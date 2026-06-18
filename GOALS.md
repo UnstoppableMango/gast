@@ -100,4 +100,42 @@ AST schema changes SHOULD be considered breaking by default. Additive changes (n
 
 ---
 
+## 7. Relationship to Existing Tools
+
+### 7.1 TreeSitter
+
+TreeSitter is a production, polyglot parse-tree library used by Neovim, GitHub Linguist, and major editors. It deserves direct comparison.
+
+**TreeSitter solves:** Real-time, incremental, error-tolerant parsing for editor tooling. Given source text, it produces an ephemeral in-memory concrete syntax tree suitable for syntax highlighting, code folding, and structural navigation — including on incomplete or broken code.
+
+**TreeSitter does not solve:**
+
+- **Serialization.** TreeSitter trees are ephemeral in-memory structures with no standard wire format for transmission or storage.
+- **Code generation.** TreeSitter is one-directional: source text → tree. There is no mechanism for tree → generated source.
+- **Typed node schemas.** TreeSitter nodes are identified by untyped strings (`node.type == "function_declaration"`). There is no schema layer and therefore no SDK generation story.
+- **Cross-language shared structure.** Each TreeSitter grammar is independent. There is no common base type shared across grammars, making it impossible to write language-agnostic pipeline middleware.
+- **Pipeline interchange.** TreeSitter is a runtime library (C, with language bindings), not a serialization contract. A downstream tool cannot consume a TreeSitter tree without taking a direct runtime dependency on TreeSitter itself.
+
+**`gast`'s position:** `gast` targets source-to-source transformation pipelines, not editor tooling. The primary artifact is a schema-defined, serializable interchange format for lossless CSTs. This enables a pipeline where:
+
+1. A parser produces a `gast`-conformant CST from source (e.g. Nix).
+2. The CST is serialized and passed to a transformer tool.
+3. The transformer maps the source CST to a target language representation (e.g. Go AST).
+4. A generator emits target source from that representation.
+
+TreeSitter MAY serve as an input to step 1 — a TreeSitter parse result could be adapted into a `gast` representation — but it does not replace steps 2–4, nor does it provide the schema contract that makes the pipeline composable across independent tools and languages.
+
+| | TreeSitter | gast |
+|---|---|---|
+| Primary use case | Editor tooling | Source-to-source transform pipeline |
+| Direction | Parse only (source → tree) | Parse + generate (source ↔ tree) |
+| Serialization | None standard | Schema-defined interchange format |
+| Node typing | Untyped strings | OpenAPI schema (typed SDKs planned) |
+| Cross-language base | None | Shared core all extensions conform to |
+| Runtime dependency | C library required | Schema-first; any compliant toolchain |
+| Lossless | Yes (in memory) | Yes, and serializable |
+| Error recovery | Yes (designed for it) | Not a goal |
+
+---
+
 *This document is intended to evolve. Sections marked with SHOULD or MAY represent aspirational or flexible guidance and are subject to revision as the project matures.*

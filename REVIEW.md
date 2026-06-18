@@ -93,7 +93,7 @@ Scope discipline is good — the out-of-scope list especially is clear and usefu
 
 *Open items to resolve before implementation:*
 
-- [ ] Address TreeSitter comparison (#1)
+- [x] Address TreeSitter comparison (#1)
 - [ ] Justify OpenAPI vs. alternatives or switch (#2)
 - [ ] Define wire format (#3)
 - [ ] Write end-to-end consumer example (#4)
