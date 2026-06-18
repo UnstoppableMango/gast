@@ -98,6 +98,6 @@ Scope discipline is good — the out-of-scope list especially is clear and usefu
 - [x] Define wire format (#3)
 - [x] Write end-to-end consumer example (#4)
 - [x] Design plugin mechanism (#5)
-- [ ] Define `go/ast` derivation strategy (#6)
+- [x] Define `go/ast` derivation strategy (#6)
 - [ ] Define core↔extension version compatibility contract (#7)
 - [ ] Specify which AST stage `gast` targets (#8)

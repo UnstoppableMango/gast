@@ -71,6 +71,12 @@ This ensures generic pipeline middleware can operate on any `gast`-conformant AS
 
 When an official AST definition exists for a target language, `gast` SHOULD derive its schema from that authoritative source to maximize accuracy and maintainability. The derivation process, including any transformations applied, SHOULD be documented. Where derivation is not possible, the schema MUST be noted as a best-effort implementation.
 
+**Interface and union types.** Source languages often express node categories through interface or union types (Go interfaces, OCaml variants, TypeScript union types). These MUST be mapped to protobuf wrapper messages with a `oneof` field covering all known concrete members, making the type hierarchy explicit and schema-visible. The full member set MUST be documented in the language extension schema.
+
+**Public API surface only.** The gast schema for a language MUST cover only the public, documented API surface of the source AST definition. Internal, unexported, or deprecated members MUST be excluded. Exclusions MUST be documented in the language extension schema with the reason.
+
+*Example — Go:* `go/ast` defines `Node`, `Stmt`, `Expr`, and `Decl` as interfaces with many concrete struct implementors; each maps to a `oneof` wrapper message. Unexported fields and deprecated `*ast.Object` fields (pre-type-checker scope data superseded by `go/types`) are excluded.
+
 ### 3.4 Wire Format
 
 The canonical interchange format is protobuf binary. Consumers MUST serialize and deserialize `gast` data using the protobuf binary encoding of the generated types.
