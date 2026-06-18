@@ -94,8 +94,8 @@ Scope discipline is good — the out-of-scope list especially is clear and usefu
 *Open items to resolve before implementation:*
 
 - [x] Address TreeSitter comparison (#1)
-- [ ] Justify OpenAPI vs. alternatives or switch (#2)
-- [ ] Define wire format (#3)
+- [x] Justify OpenAPI vs. alternatives or switch (#2)
+- [x] Define wire format (#3)
 - [ ] Write end-to-end consumer example (#4)
 - [ ] Design plugin mechanism (#5)
 - [ ] Define `go/ast` derivation strategy (#6)
