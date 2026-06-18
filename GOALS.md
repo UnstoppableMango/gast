@@ -110,6 +110,23 @@ Individual language extensions SHOULD be versioned independently of core and ind
 
 AST schema changes SHOULD be considered breaking by default. Additive changes (new optional fields, new node kinds) MAY be treated as minor or patch increments at the maintainer's discretion, provided existing consumers are not affected.
 
+### 5.4 Core–Extension Compatibility Contract
+
+Independent extension versioning creates diamond dependency risk: a consumer combining `core@2.0` with `go-ext@1.0` (built against `core@1.0`) faces ambiguous compatibility without an explicit contract.
+
+**Core major version as compatibility hub.** Each core major version is a stable compatibility surface (analogous to a k8s storage version hub). All extensions declaring support for a given hub are guaranteed a consistent schema surface. Crossing hub boundaries requires explicit re-validation.
+
+**Extension manifest requirements:**
+
+- Each extension MUST declare `min_core_major` — the minimum core major version the extension supports.
+- Each extension SHOULD declare `max_core_major` — the highest core major version the extension has been validated against. If omitted, consumers MUST treat it as equal to `min_core_major`.
+
+**Core backward-compatibility guarantee.** Within a major version, core MUST be backward-compatible: adding optional fields, new message types, or new enum values is non-breaking. Removing, renaming, or retyping any existing field is a major-version break. This guarantee means an extension built against `core@1.0` is guaranteed to work with any `core@1.x`.
+
+**Toolchain enforcement.** Consumers MUST NOT combine an extension with a core version outside its declared range (`min_core_major ≤ core.major ≤ max_core_major`). The `gast` toolchain SHOULD enforce this at schema resolution time (codegen invocation or manifest parse) and MUST emit an error, not a warning, on violation. This mirrors CNI version negotiation: both parties declare supported version ranges; incompatible combinations are rejected at resolution time, not at runtime.
+
+**Upgrade path.** When core increments major (e.g. `core@1.x → core@2.0`), extension authors MUST explicitly bump `max_core_major` after validation. This is a deliberate attestation act, not an automatic assumption. An extension that has not been updated for a new core major MUST be treated as incompatible with that major, even if no schema changes affect it in practice.
+
 ---
 
 ## 6. Non-Goals and Constraints
