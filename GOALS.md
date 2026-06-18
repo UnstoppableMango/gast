@@ -108,7 +108,7 @@ The canonical interchange format is protobuf binary. Consumers MUST serialize an
 Examples of in-scope tool use:
 
 - A parser for languages that do not publish a formal AST (e.g. Nix).
-- A source-massaging tool that re-exports AST types hidden behind `internal` packages (e.g. the Go implementation of the TypeScript compiler).
+- A source-massaging tool that re-exports AST types hidden behind `internal` packages (e.g. [`microsoft/TypeScript-Go`](https://github.com/microsoft/TypeScript-Go), which provides a pseudo-public Go implementation of the TypeScript compiler's AST but does not export its internal node types directly).
 
 Tool binaries MUST NOT implement AST conversion, code generation, or any functionality listed in [§2.2](#22-out-of-scope).
 
@@ -144,6 +144,18 @@ Independent extension versioning creates diamond dependency risk: a consumer com
 **Toolchain enforcement.** Consumers MUST NOT combine an extension with a core version outside its declared range (`min_core_major ≤ core.major ≤ max_core_major`). The `gast` toolchain SHOULD enforce this at schema resolution time (codegen invocation or manifest parse) and MUST emit an error, not a warning, on violation. This mirrors CNI version negotiation: both parties declare supported version ranges; incompatible combinations are rejected at resolution time, not at runtime.
 
 **Upgrade path.** When core increments major (e.g. `core@1.x → core@2.0`), extension authors MUST explicitly bump `max_core_major` after validation. This is a deliberate attestation act, not an automatic assumption. An extension that has not been updated for a new core major MUST be treated as incompatible with that major, even if no schema changes affect it in practice.
+
+### 5.5 Update Detection and Cadence
+
+Upstream language AST changes (e.g. a new node type in Go 1.N) MUST be tracked and incorporated into the corresponding `gast` extension. The update trigger is standard dependency management tooling (e.g. Renovate): when an upstream language package or compiler version is bumped in the `gast` dependency manifest, the extension MUST be reviewed and updated to reflect any AST changes.
+
+Three update paths are defined, in order of increasing automation:
+
+- **Common path:** A maintainer manually reviews upstream AST changes introduced by the version bump and updates the extension schema and parser accordingly.
+- **Happy path:** The parser is partially generated from the upstream AST definition. A codegen run after the version bump rebuilds the affected parser components automatically, requiring only human review of the diff.
+- **Ideal path:** The parser and schema derivation are fully codegen'd from the upstream AST definition. An automated pipeline (CI) detects the version bump, reruns codegen, and produces a schema update PR with no manual schema authoring required.
+
+Extension authors SHOULD document which update path applies to their extension. Extensions on the common path SHOULD include a changelog entry summarizing AST changes incorporated from each upstream version.
 
 ---
 
