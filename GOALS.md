@@ -2,7 +2,7 @@
 
 ## Abstract
 
-`gast` (Global AST) is a project for defining and aggregating programming language abstract syntax trees (ASTs) in a standardized, polyglot-consumable format. It aims to serve as the common schema layer for code generation pipelines that operate across language boundaries — for example, a pipeline that reads TypeScript source, converts it to a Go representation, and generates Go types. The project's primary output is a Protocol Buffers schema; generated SDKs and tool binaries are secondary outputs.
+`gast` (Global AST) is a project for defining and aggregating programming language parse trees in a standardized, polyglot-consumable format. The term "AST" is used for approachability; `gast` targets the parse stage with concrete syntax tree (CST) fidelity — preserving whitespace, comments, and source positions as first-class schema data. It aims to serve as the common schema layer for code generation pipelines that operate across language boundaries — for example, a pipeline that reads TypeScript source, converts it to a Go representation, and generates Go types. The project's primary output is a Protocol Buffers schema; generated SDKs and tool binaries are secondary outputs.
 
 ---
 
@@ -40,6 +40,24 @@ The following are explicitly outside the scope of this repository:
 - **Compilation.** `gast` is not a compiler and MUST NOT implement compilation pipelines.
 - **Runtime evaluation.** `gast` MUST NOT evaluate, interpret, or execute code represented by an AST.
 - **Type inference.** Type resolution or inference over AST nodes is out of scope.
+- **Name binding and scope resolution.** Resolving which declaration an identifier refers to requires semantic analysis and is out of scope. `gast` represents identifiers as written in source.
+- **Post-analysis representations.** Typed ASTs, HIR, MIR, or any IR produced after semantic analysis are out of scope. `gast` targets pre-analysis parse output only (see [§2.3](#23-ast-stage-and-fidelity-target)).
+
+### 2.3 AST Stage and Fidelity Target
+
+`gast` targets the **parse stage** — the representation produced by a language parser before any semantic analysis, type resolution, or name binding is performed.
+
+**Fidelity target: CST-level.** `gast` aims for concrete syntax tree (CST) fidelity: the schema MUST represent whitespace, comments, and source positions as first-class data. Round-trip fidelity to source text MUST be achievable from a `gast` representation without loss. This is stricter than a minimal abstract syntax tree, which typically discards syntactic noise.
+
+**Out of scope at the schema level:**
+
+- Type resolution or inference (see [§2.2](#22-out-of-scope)).
+- Name binding or scope resolution.
+- Any information requiring a type-checker or semantic analysis pass.
+
+**When upstream sources are ASTs, not CSTs.** Some languages publish AST definitions rather than CST definitions (e.g., `go/ast` is an AST, though it does carry comment and position data). In these cases, `gast` MUST build toward CST purity: it MUST supplement the upstream AST to represent any syntactic information the upstream drops. Where full CST reconstruction is not feasible, the gap MUST be documented in the language extension schema.
+
+**Why retain the "AST" name.** "AST" is the broadly recognized term for structured representations of parsed source code. `gast` retains it for approachability. The formal intent is a parse-stage, CST-fidelity representation — not the minimal, semantics-only tree a compiler front-end produces.
 
 ---
 

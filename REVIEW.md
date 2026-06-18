@@ -100,4 +100,4 @@ Scope discipline is good — the out-of-scope list especially is clear and usefu
 - [x] Design plugin mechanism (#5)
 - [x] Define `go/ast` derivation strategy (#6)
 - [x] Define core↔extension version compatibility contract (#7)
-- [ ] Specify which AST stage `gast` targets (#8)
+- [x] Specify which AST stage `gast` targets (#8)
