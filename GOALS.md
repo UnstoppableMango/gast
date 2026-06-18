@@ -14,7 +14,7 @@
 
 ### 1.2 Secondary Goals
 
-- `gast` SHOULD generate client SDKs from the OpenAPI specification to enable consumption in multiple programming languages without requiring consumers to hand-write schema bindings.
+- `gast` SHOULD generate client SDKs from the protobuf schema to enable consumption in multiple programming languages without requiring consumers to hand-write schema bindings.
 - `gast` SHOULD ship ad-hoc tool binaries that assist in deriving or adapting language ASTs for inclusion in the specification (see [§4. Tool Binaries](#4-tool-binaries)).
 
 ---
@@ -26,7 +26,7 @@
 - **Core schema definition.** A set of common AST base types (e.g. node kind, source span, children) that all language schemas MUST conform to.
 - **Language extensions.** Per-language schema extensions that annotate or extend core types to express language-specific AST structures.
 - **Language coverage.** Initial target languages are Go, OCaml, and Nix. The model MUST be pluggable to support additional languages over time.
-- **Schema derivation.** Where an official AST definition exists (e.g. `go/ast`, the TypeScript compiler), the `gast` schema SHOULD be derived from that source. Where no official AST exists or is inaccessible, the schema MUST be implemented best-effort and documented as such.
+- **Schema derivation.** Where an official AST definition exists (e.g. `go/ast`), the `gast` schema SHOULD be derived from that source. Where no official AST exists or is inaccessible, the schema MUST be implemented best-effort and documented as such.
 - **Protocol Buffers schema.** The schema MUST be defined in `.proto` files and conform to proto3 syntax.
 - **Generated SDKs.** Client libraries generated from the protobuf schema via `protoc` and language-specific plugins.
 - **Tool binaries.** Utilities that assist in the process of making a language's AST accessible for schema derivation (see [§4](#4-tool-binaries)).
@@ -77,8 +77,8 @@ Per-language schemas MUST extend core types rather than replacing them. The core
 
 **Plugin contract:**
 
-- **Parsers** MUST populate core fields for all concepts that map to core types. For concepts with no clean core mapping, parsers SHOULD emit a language-specific message (e.g. `TypeScriptTypeAssertion`) packed as `Any` in `extensions`.
-- **Transformers** MUST process core fields. Transformers MAY unpack and consume known `extensions` entries to enable language-aware behavior (e.g. a TS→Go transformer consuming `TypeScriptTypeAssertion`). Unknown extension type URLs MUST be ignored and SHOULD be forwarded unchanged.
+- **Parsers** MUST populate core fields for all concepts that map to core types. For concepts with no clean core mapping, parsers SHOULD emit a language-specific message (e.g. `NixLambdaPattern`) packed as `Any` in `extensions`.
+- **Transformers** MUST process core fields. Transformers MAY unpack and consume known `extensions` entries to enable language-aware behavior (e.g. a Nix→Go transformer consuming `NixLambdaPattern`). Unknown extension type URLs MUST be ignored and SHOULD be forwarded unchanged.
 - **Generators** follow the same contract as transformers: core fields are required, extension consumption is optional, unknown extensions MUST be ignored.
 
 This ensures generic pipeline middleware can operate on any `gast`-conformant AST without knowledge of any specific language, while language-aware tools can opt into richer fidelity. The `Any` type URL acts as the extension registry — no central registration is required; consumers check the URL to determine support.
@@ -108,7 +108,7 @@ The canonical interchange format is protobuf binary. Consumers MUST serialize an
 Examples of in-scope tool use:
 
 - A parser for languages that do not publish a formal AST (e.g. Nix).
-- A source-massaging tool that re-exports AST types hidden behind `internal` packages (e.g. [`microsoft/TypeScript-Go`](https://github.com/microsoft/TypeScript-Go), which provides a pseudo-public Go implementation of the TypeScript compiler's AST but does not export its internal node types directly).
+- A source-massaging tool that re-exports AST types hidden behind `internal` packages (e.g. a hypothetical wrapper around [`microsoft/TypeScript-Go`](https://github.com/microsoft/TypeScript-Go), which provides a pseudo-public Go implementation of the TypeScript compiler's AST but does not export its internal node types directly, were TypeScript a target language).
 
 Tool binaries MUST NOT implement AST conversion, code generation, or any functionality listed in [§2.2](#22-out-of-scope).
 
@@ -163,8 +163,8 @@ Extension authors SHOULD document which update path applies to their extension. 
 
 - `gast` MUST NOT take a runtime dependency on any specific cloud provider.
 - The protobuf schema MUST remain vendor-neutral and consumable by any standards-compliant `protoc` toolchain.
-- `gast` does not aim to be a universal IR (intermediate representation) for compilation; it targets static structure only.
-- **Streaming protocols** are out of scope for v1. They MAY be considered if performance requirements demand it.
+- `gast` does not aim to be a universal IR (intermediate representation) for compilation; it targets parse-stage, pre-analysis structure only.
+- **Streaming protocols** are out of scope for the initial release. They MAY be considered if performance requirements demand it.
 
 ---
 
@@ -184,7 +184,7 @@ TreeSitter is a production, polyglot parse-tree library used by Neovim, GitHub L
 - **Cross-language shared structure.** Each TreeSitter grammar is independent. There is no common base type shared across grammars, making it impossible to write language-agnostic pipeline middleware.
 - **Pipeline interchange.** TreeSitter is a runtime library (C, with language bindings), not a serialization contract. A downstream tool cannot consume a TreeSitter tree without taking a direct runtime dependency on TreeSitter itself.
 
-**`gast`'s position:** `gast` targets source-to-source transformation pipelines, not editor tooling. The primary artifact is a schema-defined, serializable interchange format for lossless CSTs. This enables a pipeline where:
+**`gast`'s position:** `gast` provides the schema layer for source-to-source transformation pipelines, not editor tooling. The primary artifact is a schema-defined, serializable interchange format for lossless CSTs. This enables a pipeline where:
 
 1. A parser produces a `gast`-conformant CST from source (e.g. Nix).
 2. The CST is serialized and passed to a transformer tool.
