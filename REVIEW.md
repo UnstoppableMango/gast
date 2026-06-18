@@ -96,7 +96,7 @@ Scope discipline is good — the out-of-scope list especially is clear and usefu
 - [x] Address TreeSitter comparison (#1)
 - [x] Justify OpenAPI vs. alternatives or switch (#2)
 - [x] Define wire format (#3)
-- [ ] Write end-to-end consumer example (#4)
+- [x] Write end-to-end consumer example (#4)
 - [ ] Design plugin mechanism (#5)
 - [ ] Define `go/ast` derivation strategy (#6)
 - [ ] Define core↔extension version compatibility contract (#7)
