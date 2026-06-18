@@ -55,7 +55,17 @@ The following are explicitly outside the scope of this repository:
 
 ### 3.2 Language Extensions
 
-Per-language schemas MUST extend core types rather than replacing them. Language-specific fields MUST be expressed via a dedicated extension field on the core node type. This ensures generic tooling can process any `gast`-conformant AST at the core level without knowledge of a specific language.
+Per-language schemas MUST extend core types rather than replacing them. The core `Node` type MUST include a `repeated google.protobuf.Any extensions` field. Language-specific concepts that do not map cleanly to core node types MAY be expressed as distinct proto messages packed into that field.
+
+**Plugin contract:**
+
+- **Parsers** MUST populate core fields for all concepts that map to core types. For concepts with no clean core mapping, parsers SHOULD emit a language-specific message (e.g. `TypeScriptTypeAssertion`) packed as `Any` in `extensions`.
+- **Transformers** MUST process core fields. Transformers MAY unpack and consume known `extensions` entries to enable language-aware behavior (e.g. a TS→Go transformer consuming `TypeScriptTypeAssertion`). Unknown extension type URLs MUST be ignored and SHOULD be forwarded unchanged.
+- **Generators** follow the same contract as transformers: core fields are required, extension consumption is optional, unknown extensions MUST be ignored.
+
+This ensures generic pipeline middleware can operate on any `gast`-conformant AST without knowledge of any specific language, while language-aware tools can opt into richer fidelity. The `Any` type URL acts as the extension registry — no central registration is required; consumers check the URL to determine support.
+
+**Extension discovery:** `Any` type URLs are sufficient for v1 — consumers check the URL, unpack or ignore. No central registry required. A well-known namespace (`gast.core.v1.*`) SHOULD be established for extension concepts that appear across multiple languages (e.g. type annotations, visibility modifiers, generics); promoting a concept to well-known enables language-agnostic transformer behavior without per-language handling. Well-known types SHOULD NOT be defined until a concept is observed in two or more language implementations.
 
 ### 3.3 Schema Derivation
 
