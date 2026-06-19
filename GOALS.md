@@ -47,7 +47,7 @@ The following are explicitly outside the scope of this repository:
 
 `gast` targets the **parse stage** — the representation produced by a language parser before any semantic analysis, type resolution, or name binding is performed.
 
-**Fidelity target: CST-level.** `gast` aims for concrete syntax tree (CST) fidelity: the schema MUST represent whitespace, comments, and source positions as first-class data. Round-trip fidelity to source text MUST be achievable from a `gast` representation without loss. This is stricter than a minimal abstract syntax tree, which typically discards syntactic noise.
+**Fidelity target: CST-level.** `gast` aims for concrete syntax tree (CST) fidelity: the schema MUST represent whitespace, comments, and source positions as first-class data. Round-trip fidelity to source text SHOULD be achievable from a `gast` representation without loss. This is stricter than a minimal abstract syntax tree, which typically discards syntactic noise.
 
 **Out of scope at the schema level:**
 
@@ -83,7 +83,7 @@ Per-language schemas MUST extend core types rather than replacing them. The core
 
 This ensures generic pipeline middleware can operate on any `gast`-conformant AST without knowledge of any specific language, while language-aware tools can opt into richer fidelity. The `Any` type URL acts as the extension registry — no central registration is required; consumers check the URL to determine support.
 
-**Extension discovery:** `Any` type URLs are sufficient for v1 — consumers check the URL, unpack or ignore. No central registry required. A well-known namespace (`gast.core.v1.*`) SHOULD be established for extension concepts that appear across multiple languages (e.g. type annotations, visibility modifiers, generics); promoting a concept to well-known enables language-agnostic transformer behavior without per-language handling. Well-known types SHOULD NOT be defined until a concept is observed in two or more language implementations.
+**Extension discovery:** `Any` type URLs are sufficient for v1 — consumers check the URL, unpack or ignore. No central registry required. Extension authors SHOULD compile the necessary proto descriptors into their tools; descriptor distribution or dynamic reflection is optional. Unknown extension types SHOULD be ignored. A well-known namespace (`gast.core.v1.*`) SHOULD be established for extension concepts that appear across multiple languages (e.g. type annotations, visibility modifiers, generics); promoting a concept to well-known enables language-agnostic transformer behavior without per-language handling. Well-known types SHOULD NOT be defined until a concept is observed in two or more language implementations.
 
 ### 3.3 Schema Derivation
 
