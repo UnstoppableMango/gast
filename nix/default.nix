@@ -1,4 +1,4 @@
-{ buf, protoc-gen-go, ocaml-protoc }:
+{ buf, protoc-gen-go, ocaml-protoc-plugin }:
 buf.generate {
   name = "gast";
   src = ../.;
@@ -27,9 +27,8 @@ buf.generate {
         opt = [ "paths=source_relative" ];
       }
       {
-        package = ocaml-protoc;
+        local = "${ocaml-protoc-plugin}/bin/protoc-gen-ocaml";
         out = "gen/ocaml";
-        # opt = [ "paths=source_relative" ];
       }
     ];
   };

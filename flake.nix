@@ -43,7 +43,7 @@
         {
           packages.default = pkgs.callPackage ./nix {
             inherit (inputs'.a2b.legacyPackages.lib) buf;
-            inherit (inputs'.mangopkgs.packages) ocaml-protoc;
+            inherit (pkgs.ocamlPackages) ocaml-protoc-plugin;
           };
 
           devShells.default = pkgs.mkShellNoCC {
