@@ -1,0 +1,5 @@
+# Written by `tdl gen`, which owns the files listed below.
+# `tdl gen --clean` removes them; anything else here is left alone.
+hast/v1/hast.proto
+mdast/v1/mdast.proto
+unist/v1/unist.proto

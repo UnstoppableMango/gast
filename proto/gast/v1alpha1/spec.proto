@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-package gast.v1alpha1;
-
-message Node {
-  string hello = 1;
-}

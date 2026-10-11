@@ -1,5 +1,5 @@
 {
-  description = "A Nix flake";
+  description = "unist, mdast, and hast as TDL definitions, with the protobuf schema and SDKs generated from them";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -26,6 +26,14 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
+    tdl = {
+      url = "github:UnstoppableMango/tdl";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.mangopkgs.follows = "mangopkgs";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
+
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -36,20 +44,42 @@
     inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import inputs.systems;
-      imports = [ inputs.treefmt-nix.flakeModule ];
+      imports = [
+        inputs.tdl.flakeModules.default
+        inputs.treefmt-nix.flakeModule
+      ];
 
       perSystem =
         { inputs', pkgs, ... }:
+        let
+          defs = [
+            "defs/unist/unist.tdl"
+            "defs/mdast/mdast.tdl"
+            "defs/hast/hast.tdl"
+          ];
+        in
         {
           packages.default = pkgs.callPackage ./nix {
             inherit (inputs'.a2b.legacyPackages.lib) buf;
             inherit (pkgs.ocamlPackages) ocaml-protoc-plugin;
           };
 
+          # defs/ is the source of truth, and proto/ is generated from it and
+          # committed. tdl-gen fails when the two disagree.
+          tdl = {
+            enable = true;
+            package = inputs'.tdl.packages.default;
+            src = ./.;
+            files = defs;
+            gen.files = defs;
+            devShell.enable = false;
+          };
+
           devShells.default = pkgs.mkShellNoCC {
             packages = with pkgs; [
               buf
               gnumake
+              inputs'.tdl.packages.default
               nixfmt
             ];
           };

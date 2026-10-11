@@ -1,6 +1,10 @@
-{ buf, protoc-gen-go, ocaml-protoc-plugin }:
+{
+  buf,
+  protoc-gen-go,
+  ocaml-protoc-plugin,
+}:
 buf.generate {
-  name = "gast";
+  name = "treespec";
   src = ../.;
 
   flags = [
@@ -12,7 +16,7 @@ buf.generate {
     managed.override = [
       {
         file_option = "go_package_prefix";
-        value = "github.com/UnstoppableMango/gast/gen/go";
+        value = "github.com/UnstoppableMango/treespec/gen/go";
       }
     ];
 

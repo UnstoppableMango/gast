@@ -1,0 +1,11 @@
+# Losses a protobuf schema cannot avoid. Each one is about reading the
+# generated .proto back into TDL, which nothing here does: defs/ stays the
+# source of truth.
+[lossy.protobuf]
+allow = [
+  "lossy.constraint",
+  "lossy.name",
+  "lossy.newtype",
+  "lossy.optional",
+  "lossy.primitive",
+]
