@@ -85,7 +85,7 @@ flowchart LR
 ```
 
 ```sh
-cs-to-ts foo.cs.treespec.bin | ts-generator > foo.ts
+ts-generator < foo.ts.treespec.bin > foo.ts
 ```
 
 ---
