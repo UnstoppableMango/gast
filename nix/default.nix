@@ -16,7 +16,7 @@ buf.generate {
     managed.override = [
       {
         file_option = "go_package_prefix";
-        value = "github.com/UnstoppableMango/treespec/gen/go";
+        value = "github.com/unmango/treespec/gen/go";
       }
     ];
 
