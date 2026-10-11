@@ -28,7 +28,7 @@
 
     tdl = {
       url = "github:UnstoppableMango/tdl";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # tdl builds with a newer Go than this flake's nixpkgs may carry.
       inputs.mangopkgs.follows = "mangopkgs";
       inputs.flake-parts.follows = "flake-parts";
       inputs.treefmt-nix.follows = "treefmt-nix";
