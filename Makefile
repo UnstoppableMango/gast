@@ -14,3 +14,4 @@ DEFS := defs/unist/unist.tdl defs/mdast/mdast.tdl defs/hast/hast.tdl
 
 generate gen:
 	tdl gen ${DEFS}
+	buf generate

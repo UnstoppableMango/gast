@@ -79,8 +79,10 @@
             packages = with pkgs; [
               buf
               gnumake
+              go
               inputs'.tdl.packages.default
               nixfmt
+              protoc-gen-go
             ];
           };
 

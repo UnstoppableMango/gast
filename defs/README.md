@@ -9,7 +9,8 @@ TDL descriptions of syntax trees, the source of truth for everything in `proto/`
 | `mdast/mdast.tdl` | [mdast](https://github.com/syntax-tree/mdast), markdown as remark parses it | `proto/mdast/v1/mdast.proto` |
 | `hast/hast.tdl` | [hast](https://github.com/syntax-tree/hast), HTML as rehype parses it | `proto/hast/v1/hast.proto` |
 
-Each target block names its `out`, so `make generate` (`tdl gen` over every file) rewrites `proto/`.
+Each target block names its `out`, so `make generate` (`tdl gen` over every file) rewrites `proto/`, then runs `buf generate`, which rewrites the Go SDK in `gen/go` from `buf.gen.yaml`.
+The SDK is the module `github.com/unmango/treespec`, with one package per tree: `gen/go/unist/v1`, `gen/go/mdast/v1`, and `gen/go/hast/v1`.
 Commit the result: `nix flake check` runs `tdl gen --verify` and fails when `proto/` is stale, along with `tdl check` and `tdl fmt --check`.
 `tdl.toml` allows the losses a protobuf schema cannot avoid; each is about reading the `.proto` back into TDL, which nothing here does.
 
