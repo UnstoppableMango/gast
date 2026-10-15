@@ -1,0 +1,64 @@
+// unist, the universal syntax tree: the node shape every unified tree
+// shares, and the core every other definition here builds on.
+// https://github.com/syntax-tree/unist
+//
+// Point, Position, and Data are what every tree's nodes carry. Node is a
+// node of any tree, for a tool that knows no tree's own types: it holds
+// unist's Parent children and Literal value, and a tree's own node, packed
+// as a protobuf Any, in extensions.
+/// The universal syntax tree.
+package unist.v1
+
+/// One place in a source file.
+type Point {
+  /// The 1-indexed line.
+  line: int where { min(1) }
+  /// The 1-indexed column.
+  column: int where { min(1) }
+  /// The 0-indexed offset into the file.
+  offset: int? where { min(0) }
+}
+
+/// The span of a node in its source file. A generated node has none.
+type Position {
+  /// The place of the first character of the node.
+  start: Point
+  /// The place after the last character of the node.
+  end: Point
+}
+
+/// Information from the ecosystem: any JSON object, which a plugin
+/// extends.
+type Data { }
+
+/// Any JSON value, the value of a unist Literal.
+type Value { }
+
+/// A message of any type, tagged with its type's URL.
+type Extension { }
+
+/// A node of any tree.
+type Node {
+  /// The variant of the node, such as `paragraph` or `element`.
+  type: string
+  /// Information from the ecosystem.
+  data: Data?
+  /// Where the node came from. Absent when it was generated.
+  position: Position?
+  /// The children of a Parent, in order.
+  children: [Node]
+  /// The value of a Literal.
+  value: Value?
+  /// The tree's own node, such as an mdast.v1.Nodes, and anything else a
+  /// tool knows. A consumer skips an extension whose type it does not
+  /// know, and passes it on unchanged.
+  extensions: [Extension]
+}
+
+target protobuf for unist.v1 {
+  out("../../proto")
+  file("unist.proto")
+  Data => foreign("google/protobuf/struct.proto", "google.protobuf.Struct")
+  Value => foreign("google/protobuf/struct.proto", "google.protobuf.Value")
+  Extension => foreign("google/protobuf/any.proto", "google.protobuf.Any")
+}

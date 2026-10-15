@@ -1,0 +1,84 @@
+// hast, the hypertext abstract syntax tree, as rehype produces it.
+// https://github.com/syntax-tree/hast
+//
+// Every node is a variant of Nodes, tagged by `type` as on the wire.
+// A root or an element holds comments, elements, and text, and only a root
+// holds a doctype. TDL has no way to name a subset of an enum's variants
+// yet, so children are Nodes.
+//
+// A property value in hast is a boolean, a number, a string, null, or a
+// list of strings and numbers. TDL has no untagged union yet (see
+// docs/backlog.md, "Anonymous union types"), so PropertyValue narrows it to
+// a string.
+//
+// Position and Data come from unist.tdl, the core every tree shares.
+/// The hypertext abstract syntax tree.
+package hast.v1
+
+import "../unist/unist.tdl" as unist
+
+/// The value of one property of an element, narrowed to a string.
+type PropertyValue: string
+
+/// Every hast node.
+enum Nodes {
+  /// A whole document or a fragment.
+  root {
+    /// Comments, a doctype, elements, and text.
+    children: [Nodes]
+    /// Information from the ecosystem.
+    data: unist.Data?
+    /// Where the node came from. Absent when it was generated.
+    position: unist.Position?
+  }
+  /// An element, such as a `<p>`.
+  element {
+    /// The local name of the element, such as `p`.
+    tagName: string
+    /// The element's properties, keyed by their camel-cased DOM names.
+    properties: {string -> PropertyValue}
+    /// Comments, elements, and text.
+    children: [Nodes]
+    /// The content of a `<template>`, always a root.
+    content: Nodes?
+    /// Information from the ecosystem.
+    data: unist.Data?
+    /// Where the node came from. Absent when it was generated.
+    position: unist.Position?
+  }
+  /// Everything that is just text.
+  text {
+    /// The text of the node.
+    value: string
+    /// Information from the ecosystem.
+    data: unist.Data?
+    /// Where the node came from. Absent when it was generated.
+    position: unist.Position?
+  }
+  /// An HTML comment.
+  comment {
+    /// The text of the comment.
+    value: string
+    /// Information from the ecosystem.
+    data: unist.Data?
+    /// Where the node came from. Absent when it was generated.
+    position: unist.Position?
+  }
+  /// A document type declaration, `<!doctype html>`.
+  doctype {
+    /// Information from the ecosystem.
+    data: unist.Data?
+    /// Where the node came from. Absent when it was generated.
+    position: unist.Position?
+  }
+}
+
+target protobuf for hast.v1 {
+  out("../../proto")
+  file("hast.proto")
+  Nodes.root => name("Root")
+  Nodes.element => name("Element")
+  Nodes.text => name("Text")
+  Nodes.comment => name("Comment")
+  Nodes.doctype => name("Doctype")
+}
